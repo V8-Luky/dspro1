@@ -11,6 +11,7 @@ class DatabaseClient:
     def _prepare_records(data, embeddings) -> list:
         records = []
         for d, e in zip(data, embeddings):
+            # TODO: adapt to our own data structure
             records.append(
                 {"id": d["id"], "values": e["values"], "metadata": {"text": d["text"]}}
             )
@@ -24,6 +25,20 @@ class DatabaseClient:
             "game-index", dimension=1024, metric="cosine"
         )
         self._namespace = "steam-games"
+
+    def get_similar(self, embedding, k: int = 1):
+        index = self._main_index
+        namespace = self._namespace
+
+        results = index.query(
+            namespace=namespace,
+            vector=embedding,
+            top_k=k + 1,
+            include_values=False,
+            include_metadata=True,
+        )
+
+        return results[1:]
 
     def load_data(self, data, embeddings):
         records = DatabaseClient._prepare_records(data, embeddings)
