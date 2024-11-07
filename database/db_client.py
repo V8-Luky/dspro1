@@ -6,7 +6,7 @@ from pinecone import ServerlessSpec
 from pinecone import Index
 
 
-class DatabaseClient:
+class GameDatabase:
     @staticmethod
     def _prepare_records(data, embeddings) -> list:
         records = []
@@ -43,9 +43,15 @@ class DatabaseClient:
         )
 
         return results[1:]
+    
+    def get_by_id(self, id):
+        pass
+
+    def get_by_name(self, name: str):
+        pass
 
     def load_data(self, data, embeddings):
-        records = DatabaseClient._prepare_records(data, embeddings)
+        records = GameDatabase._prepare_records(data, embeddings)
         self._upsert_records(namespace=self._namespace, records=records)
 
     def _create_index(self, index_name: str, dimension: int, metric: str):
