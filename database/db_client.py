@@ -26,6 +26,10 @@ class DatabaseClient:
         )
         self._namespace = "steam-games"
 
+    @property
+    def index(self) -> Index:
+        return self._main_index
+
     def get_similar(self, embedding, k: int = 1):
         index = self._main_index
         namespace = self._namespace
