@@ -1,5 +1,5 @@
 import time
-from typing import overload
+import numpy as np
 
 from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone import ServerlessSpec
@@ -8,21 +8,19 @@ from pinecone import Index
 
 class GameDatabase:
     @staticmethod
-    def _prepare_records(data, embeddings) -> list:
+    def _prepare_records(ids: list[str], metadata_records: list[dict], embeddings: list) -> list:
         records = []
-        for d, e in zip(data, embeddings):
-            # TODO: adapt to our own data structure
+        for id_, metadata, embedding in zip(ids, metadata_records, embeddings):
             records.append(
-                {"id": d["id"], "values": e["values"], "metadata": {"text": d["text"]}}
+                {"id": id_, "values": embedding, "metadata": {key: metadata[key] for key in metadata.keys() if key != "id"}}
             )
 
         return records
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, dimension: int = 1024):
         self.pc = Pinecone(api_key=api_key)
-        # TODO:
         self._main_index = self._create_index(
-            "game-index", dimension=1024, metric="cosine"
+            "game-index", dimension=dimension, metric="cosine"
         )
         self._namespace = "steam-games"
 
@@ -30,29 +28,38 @@ class GameDatabase:
     def index(self) -> Index:
         return self._main_index
 
-    def get_similar(self, embedding, k: int = 1):
+    def get_similar(self, embedding: np.ndarray, k: int = 1):
         index = self._main_index
         namespace = self._namespace
 
         results = index.query(
             namespace=namespace,
             vector=embedding,
-            top_k=k + 1,
+            top_k=k,
             include_values=False,
             include_metadata=True,
         )
 
-        return results[1:]
-    
-    def get_by_id(self, id):
-        pass
+        return results["matches"]
 
-    def get_by_name(self, name: str):
-        pass
+    def get_by_id(self, id_: str):
+        index = self._main_index
+        namespace = self._namespace
 
-    def load_data(self, data, embeddings):
-        records = GameDatabase._prepare_records(data, embeddings)
-        self._upsert_records(namespace=self._namespace, records=records)
+        results = index.fetch(
+            namespace=namespace,
+            ids=[id_],
+        )
+
+        return results["vectors"][id_]
+
+    def load_data(self, ids: list[str], data: list[dict], embeddings: list):
+        records = GameDatabase._prepare_records(ids, data, embeddings)
+        self._upsert_records(namespace=self._namespace,
+                             index=self._main_index, records=records)
+
+    def describe_index(self):
+        return self._main_index.describe_index_stats()
 
     def _create_index(self, index_name: str, dimension: int, metric: str):
         if not self.pc.has_index(index_name):
@@ -67,15 +74,7 @@ class GameDatabase:
         while not self.pc.describe_index(index_name).status["ready"]:
             time.sleep(1)
 
-        return self.pc.Index("example-index")
+        return self.pc.Index(index_name)
 
-    def _upsert_records(self, namespace: str, records: list[dict]):
-        self._upsert_records(
-            namespace=namespace, index=self._main_index, records=records
-        )
-
-    @overload
     def _upsert_records(self, namespace: str, index: Index, records: list[dict]):
-        index.upsert(records=records, namespace=namespace)
-        time.sleep(5)
-        print(f"{index.describe_index_stats()}")
+        index.upsert(vectors=records, namespace=namespace)
