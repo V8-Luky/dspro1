@@ -45,7 +45,10 @@ class GameDatabase:
             include_metadata=True,
         )
 
-        return results["matches"]
+        if len(results["matches"]) < 1:
+            return None
+
+        return results["matches"][0]
 
     def get_similar(self, embedding: np.ndarray, k: int = 1):
         index = self._main_index
@@ -72,9 +75,12 @@ class GameDatabase:
 
         return results["vectors"][id_]
 
+    def get_ids(self):
+        return list(self._main_index.list(namespace=self._namespace))[0]
+
     def get_random(self):
-        id_ = np.random.choice(
-            self._main_index.list(namespace=self._namespace))
+        ids = self.get_ids()
+        id_ = np.random.choice(ids)
         return self.get_by_id(id_)
 
     def load_data(self, ids: list[str], data: list[dict], embeddings: list):
