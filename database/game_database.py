@@ -12,13 +12,15 @@ class GameDatabase:
         records = []
         for id_, metadata, embedding in zip(ids, metadata_records, embeddings):
             records.append(
-                {"id": id_, "values": embedding, "metadata": {key: metadata[key] for key in metadata.keys() if key != "id"}}
+                {"id": id_, "values": embedding, "metadata": {
+                    key: metadata[key] for key in metadata.keys() if key != "id"}}
             )
 
         return records
 
     def __init__(self, api_key: str, dimension: int = 1024):
         self.pc = Pinecone(api_key=api_key)
+        self._dimension = dimension
         self._main_index = self._create_index(
             "game-index", dimension=dimension, metric="cosine"
         )
@@ -27,6 +29,23 @@ class GameDatabase:
     @property
     def index(self) -> Index:
         return self._main_index
+
+    def get_similarity(self, name: str, embedding: np.ndarray):
+        index = self._main_index
+        namespace = self._namespace
+
+        results = index.query(
+            namespace=namespace,
+            vector=embedding,
+            top_k=1,
+            filter={
+                "name": {"$eq": name}
+            },
+            include_values=False,
+            include_metadata=True,
+        )
+
+        return results["matches"]
 
     def get_similar(self, embedding: np.ndarray, k: int = 1):
         index = self._main_index
@@ -52,6 +71,11 @@ class GameDatabase:
         )
 
         return results["vectors"][id_]
+
+    def get_random(self):
+        id_ = np.random.choice(
+            self._main_index.list(namespace=self._namespace))
+        return self.get_by_id(id_)
 
     def load_data(self, ids: list[str], data: list[dict], embeddings: list):
         records = GameDatabase._prepare_records(ids, data, embeddings)
