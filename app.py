@@ -1,15 +1,16 @@
 from flask import Flask, Request, request
 from backend.integration import Integration
+from database.api_key import api_key as pinecone_api_key
 from database.game_database import GameDatabase
+from genai.api_key import api_key as gemini_api_key
 from logic.hint_generator import HintGenerator
 
 app = Flask(__name__)
 
-PINECONE_API_KEY = "3ba8f200-99a7-4b16-8d49-ba671878b6d9"  # Yeah, security
 DIMENSIONALITY = 384
 
-database = GameDatabase(api_key=PINECONE_API_KEY, dimension=DIMENSIONALITY)
-hint_generator = HintGenerator()
+database = GameDatabase(api_key=pinecone_api_key, dimension=DIMENSIONALITY)
+hint_generator = HintGenerator(api_key=gemini_api_key)
 
 integration = Integration(database=database, hint_generator=hint_generator)
 
@@ -23,14 +24,14 @@ NAME_QUERY = "name"
 def get_name_from_request(req: Request) -> str | None:
     if NAME_QUERY not in req.args:
         return None
-    return req.args.get("name").strip("\"")
+    return req.args.get("name").strip('"')
 
 
 def get_no_name_error() -> tuple[str, int]:
-    return "Must provide a \"name\" query parameter", BAD_REQUEST
+    return 'Must provide a "name" query parameter', BAD_REQUEST
 
 
-@app.route('/guess', methods=["POST"])
+@app.route("/guess", methods=["POST"])
 def guess_game():
     if (name := get_name_from_request(request)) is None:
         return get_no_name_error()
@@ -42,12 +43,12 @@ def guess_game():
     return guess_result.to_json(), SUCCESS
 
 
-@app.route('/games', methods=["GET"])
+@app.route("/games", methods=["GET"])
 def get_games():
     return integration.get_games().to_json(), SUCCESS
 
 
-@app.route('/hint', methods=["GET"])
+@app.route("/hint", methods=["GET"])
 def get_hint():
     if (name := get_name_from_request(request)) is None:
         return get_no_name_error()
@@ -59,5 +60,5 @@ def get_hint():
     return hint.to_json(), SUCCESS
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
