@@ -1,6 +1,5 @@
 import google.generativeai as genai
 
-# Yes, yes, very secure - should use something like: os.environ.get("GEMINI_API_KEY"))
 DEFAULT_MODEL = "gemini-1.5-flash"
 
 
