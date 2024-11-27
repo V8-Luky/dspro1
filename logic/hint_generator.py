@@ -12,14 +12,15 @@ You must not make it too easy.
 
 
 class HintGenerator:
-    def __init__(self, hint_prompt: str = DEFAULT_HINT_PROMPT):
-        self._model = GenAIModel()
+    def __init__(self, api_key: str, hint_prompt: str = DEFAULT_HINT_PROMPT):
+        self._model = GenAIModel(api_key=api_key)
         self._hint_prompt = hint_prompt
 
     def generate_hint(self, target_game_name: str, guessed_game_name: str) -> str:
         try:
             prompt = self._hint_prompt.format(
-                target_game_name=target_game_name, guessed_game_name=guessed_game_name)
+                target_game_name=target_game_name, guessed_game_name=guessed_game_name
+            )
             return self._model.get_response(prompt=prompt)
         except ValueError:
             return None
