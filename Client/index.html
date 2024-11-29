@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess Today's Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+</head>
+<body>
+<!-- Modal Popup -->
+<div id="congratsModal" class="modal">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2>Congratulations!</h2>
+        <p>You have guessed the correct game!</p>
+        <p>Get the game here cheaper</p>
+        <a id="g2aLink" href="https://www.g2a.com/" target="_blank" class="g2a-link">Visit G2A</a>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Guess today's game</h1>
+    <input type="text" id="guessInput" placeholder="Make a guess here...">
+    <button id="guessButton">Submit Guess</button>
+    <table id="guessTable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Genres</th>
+            <th>Categories</th>
+            <th>Developer</th>
+            <th>Publisher</th>
+            <th>Release Date</th>
+        </tr>
+        </thead>
+        <tbody id="guessTableBody"></tbody>
+    </table>
+</div>
+<script src="inline_data.js"></script>
+<script src="scripts.js"></script>
+</body>
+</html>
