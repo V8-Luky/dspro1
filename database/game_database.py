@@ -76,7 +76,11 @@ class GameDatabase:
         return results["vectors"][id_]
 
     def get_ids(self):
-        return list(self._main_index.list(namespace=self._namespace))[0]
+        all_ids = []
+        for page in list(self._main_index.list(namespace=self._namespace)):
+            all_ids.extend(page)
+        return all_ids
+
 
     def get_random(self):
         ids = self.get_ids()
