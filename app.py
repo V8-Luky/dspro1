@@ -1,4 +1,5 @@
 from flask import Flask, Request, request
+from flask_cors import CORS
 from backend.integration import Integration
 from database.api_key import api_key as pinecone_api_key
 from database.game_database import GameDatabase
@@ -6,6 +7,7 @@ from genai.api_key import api_key as gemini_api_key
 from logic.hint_generator import HintGenerator
 
 app = Flask(__name__)
+CORS(app)
 
 DIMENSIONALITY = 384
 
