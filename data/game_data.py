@@ -15,7 +15,7 @@ class GameData:
 
     @property
     def ids(self):
-        return list(map(lambda s: ''.join(i for i in s if ord(i) < 128), map(str, self._games["name"].tolist())))
+        return list(map(lambda s: ''.join(i for i in s if ord(i) < 128), map(str, self._games["Name"].tolist())))
 
     @property
     def embeddings(self):

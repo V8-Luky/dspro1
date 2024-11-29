@@ -8,12 +8,19 @@ from pinecone import Index
 
 class GameDatabase:
     @staticmethod
-    def _prepare_records(ids: list[str], metadata_records: list[dict], embeddings: list) -> list:
+    def _prepare_records(
+        ids: list[str], metadata_records: list[dict], embeddings: list
+    ) -> list:
         records = []
         for id_, metadata, embedding in zip(ids, metadata_records, embeddings):
             records.append(
-                {"id": id_, "values": embedding, "metadata": {
-                    key: metadata[key] for key in metadata.keys() if key != "id"}}
+                {
+                    "id": id_,
+                    "values": embedding,
+                    "metadata": {
+                        key: metadata[key] for key in metadata.keys() if key != "id"
+                    },
+                }
             )
 
         return records
@@ -21,9 +28,7 @@ class GameDatabase:
     def __init__(self, api_key: str, dimension: int = 1024):
         self.pc = Pinecone(api_key=api_key)
         self._dimension = dimension
-        self._main_index = self._create_index(
-            "game-index", dimension=dimension, metric="cosine"
-        )
+        self._create_main_index()
         self._namespace = "steam-games"
 
     @property
@@ -38,9 +43,7 @@ class GameDatabase:
             namespace=namespace,
             vector=embedding,
             top_k=1,
-            filter={
-                "name": {"$eq": name}
-            },
+            filter={"name": {"$eq": name}},
             include_values=False,
             include_metadata=True,
         )
@@ -89,11 +92,28 @@ class GameDatabase:
 
     def load_data(self, ids: list[str], data: list[dict], embeddings: list):
         records = GameDatabase._prepare_records(ids, data, embeddings)
-        self._upsert_records(namespace=self._namespace,
-                             index=self._main_index, records=records)
+        if len(records) < 1:
+            return
+
+        self._clear_data()
+        self._create_main_index()
+
+        step = 100
+        from_i, to_i = 0, 0
+        while from_i < len(records):
+            to_i += step
+            to_i = min(to_i, len(records))
+            print(f"Inserting records {from_i + 1} to {to_i}")
+            self._upsert_records(
+                namespace=self._namespace, index=self._main_index, records=records
+            )
+            from_i = to_i
 
     def describe_index(self):
         return self._main_index.describe_index_stats()
+
+    def _clear_data(self):
+        self._delete_index("game-index")
 
     def _create_index(self, index_name: str, dimension: int, metric: str):
         if not self.pc.has_index(index_name):
@@ -109,6 +129,14 @@ class GameDatabase:
             time.sleep(1)
 
         return self.pc.Index(index_name)
+
+    def _create_main_index(self):
+        self._main_index = self._create_index(
+            "game-index", dimension=self._dimension, metric="cosine"
+        )
+
+    def _delete_index(self, index_name: str):
+        self.pc.delete_index(index_name)
 
     def _upsert_records(self, namespace: str, index: Index, records: list[dict]):
         index.upsert(vectors=records, namespace=namespace)
