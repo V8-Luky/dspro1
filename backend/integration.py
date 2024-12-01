@@ -9,12 +9,15 @@ class Integration:
     def __init__(self, database: GameDatabase, hint_generator: HintGenerator):
         self._database = database
         self._hint_generator = hint_generator
+        self._game_names = []
 
         self._game = self._new_game()
 
     def get_games(self) -> GamesResponse:
-        game_names = self._database.get_ids()
-        return GamesResponse(games=game_names)
+        if not self._game_names:
+            self._game_names = self._database.get_ids()
+        
+        return GamesResponse(games=self._game_names)
 
     def guess(self, game_name) -> GameGuessResponse:
         target_game = self._get_or_update_game().target_game
