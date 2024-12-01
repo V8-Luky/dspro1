@@ -1,13 +1,12 @@
 from numpy import ndarray
-
+from typing import Union
 from sentence_transformers import SentenceTransformer
+from gensim.models import KeyedVectors
 
 
 class Embedder:
-    def __init__(self, transformer: SentenceTransformer = None, transformer_name: str = "all-MiniLM-L6-v2") -> None:
-        if not transformer:
-            transformer = SentenceTransformer(transformer_name)
-        self._transformer = transformer
+    def __init__(self, model: Union[SentenceTransformer, KeyedVectors]) -> None:
+        self._model = model
 
     def create_embeddings(self, texts: list[str]) -> list[ndarray]:
-        return self._transformer.encode(texts)
+        raise NotImplementedError()
