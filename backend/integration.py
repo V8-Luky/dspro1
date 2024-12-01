@@ -19,7 +19,7 @@ class Integration:
     def guess(self, game_name) -> GameGuessResponse:
         target_game = self._get_or_update_game().target_game
 
-        print("Target:", target_game["metadata"]["name"])
+        print("Target:", target_game["metadata"]["Name"])
         print("Guess:", game_name)
 
         result = self._database.get_similarity(
@@ -32,7 +32,7 @@ class Integration:
 
     def get_hint(self, game_name: str) -> HintResponse:
         hint = self._hint_generator.generate_hint(
-            target_game_name=self._game.target_game["metadata"]["name"], guessed_game_name=game_name)
+            target_game_name=self._game.target_game["metadata"]["Name"], guessed_game_name=game_name)
 
         return HintResponse(hint=hint)
 
