@@ -43,7 +43,7 @@ class GameDatabase:
             namespace=namespace,
             vector=embedding,
             top_k=1,
-            filter={"name": {"$eq": name}},
+            filter={"Name": {"$eq": name}},
             include_values=False,
             include_metadata=True,
         )

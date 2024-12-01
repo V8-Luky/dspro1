@@ -26,7 +26,7 @@ NAME_QUERY = "name"
 def get_name_from_request(req: Request) -> str | None:
     if NAME_QUERY not in req.args:
         return None
-    return req.args.get("name").strip('"')
+    return req.args.get(NAME_QUERY).strip('"')
 
 
 def get_no_name_error() -> tuple[str, int]:
