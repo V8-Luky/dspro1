@@ -1,13 +1,17 @@
 import numpy as np
 from numpy import ndarray
 from pandas import DataFrame
-from embedding.embedder import Embedder
+from game_embedder import GameEmbedder
+import gensim.downloader as api
 
 
-class TagsEmbedder(Embedder):
-    def create_embeddings(self, games: DataFrame) -> list[ndarray]:
-        game_tags = games["Tags"].apply(self._tokenize).tolist()
-        embeddings = np.mean([self._model[token] for game in game_tags for token in game if token in self._model], axis=0)
+class TagsEmbedder(GameEmbedder):
+    def __init__(self):
+        super().__init__(api.load('word2vec-google-news-300'))
+
+    def create_embeddings(self, games: DataFrame) -> ndarray:
+        game_tags = games["Tags"].apply(self._tokenize)
+        embeddings = game_tags.apply(lambda x: np.mean([self._model[word] for word in x if word in self._model], axis=0)).to_numpy()
         for embedding in embeddings:
             if embedding.shape[0] != 300:
                 embedding = np.zeros(300)
