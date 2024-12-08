@@ -3,9 +3,9 @@ from datetime import date
 from .game import Game
 
 class GameComparison():
+    DATE_LOWER = -1
     DATE_EQUAL = 0
-    DATE_LOWER = 1
-    DATE_HIGHER = 2
+    DATE_HIGHER = 1
     def __init__(self, target_game: Game, guessed_game: Game):
         self.name = guessed_game.name
         self.is_correct = target_game.name == guessed_game.name
