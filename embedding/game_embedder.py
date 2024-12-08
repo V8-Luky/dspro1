@@ -10,5 +10,5 @@ class GameEmbedder:
     def __init__(self, model: Union[SentenceTransformer, KeyedVectors]):
         self._model = model
 
-    def create_game_embeddings(self, games: DataFrame) -> list[ndarray]:
+    def create_embeddings(self, games: DataFrame) -> list[ndarray]:
         raise NotImplementedError
