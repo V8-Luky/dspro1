@@ -1,3 +1,5 @@
+import numpy as np
+
 from backend.dto import GameGuessResponse, HintResponse, GamesResponse
 
 from database.game_database import GameDatabase
@@ -14,10 +16,8 @@ class Integration:
         self._game = self._new_game()
 
     def get_games(self) -> GamesResponse:
-        if not self._game_names:
-            self._game_names = self._database.get_ids()
-        
-        return GamesResponse(games=self._game_names)
+        games = self._get_game_names()
+        return GamesResponse(games=games)
 
     def guess(self, game_name) -> GameGuessResponse:
         target_game = self._get_or_update_game().target_game
@@ -46,4 +46,13 @@ class Integration:
         return self._game
 
     def _new_game(self) -> DailyGame:
-        return DailyGame(self._database.get_random())
+        game_names = self._get_game_names()
+        any_game_name = np.random.choice(game_names)
+        game = self._database.get_by_id(any_game_name)
+        return DailyGame(game)
+
+    def _get_game_names(self) -> list[str]:
+        if not self._game_names:
+            self._game_names = self._database.get_ids()
+
+        return self._game_names

@@ -84,12 +84,6 @@ class GameDatabase:
             all_ids.extend(page)
         return all_ids
 
-
-    def get_random(self):
-        ids = self.get_ids()
-        id_ = np.random.choice(ids)
-        return self.get_by_id(id_)
-
     def load_data(self, ids: list[str], data: list[dict], embeddings: list):
         records = GameDatabase._prepare_records(ids, data, embeddings)
         if len(records) < 1:
