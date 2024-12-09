@@ -61,6 +61,10 @@ def get_hint():
 
     return hint.to_json(), SUCCESS
 
+@app.route("/target", methods=["GET"])
+def get_target_game():
+    return integration.get_target_game().to_json(), SUCCESS
+
 
 if __name__ == '__main__':
     app.run(debug=False, port=8080, host="0.0.0.0")
