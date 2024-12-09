@@ -39,6 +39,9 @@ class Integration:
 
         return HintResponse(hint=hint)
 
+    def get_target_game():
+        pass
+
     def _get_or_update_game(self) -> DailyGame:
         if not self._game or self._game.is_expired():
             self._game = self._new_game()
