@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 
 
 class Game():
@@ -11,7 +11,7 @@ class Game():
             categories=Game._convert_string_to_set(metadata["Categories"]),
             genres=Game._convert_string_to_set(metadata["Genres"]),
             tags=Game._convert_string_to_set(metadata["Tags"]),
-            release_date=datetime.strptime(metadata["Release date"], "%d.%m.%Y").date()
+            release_date=date.fromisoformat(metadata["Release date"])
         )
 
     @staticmethod
