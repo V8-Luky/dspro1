@@ -1,7 +1,7 @@
-from datetime import datetime, date
+from datetime import datetime
 
 
-class DailyGame:
+class DailyTargetGame:
     def __init__(self, target_game) -> None:
         self._start_time = datetime.now().date()
         self._target_game = target_game
