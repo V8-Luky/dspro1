@@ -5,6 +5,7 @@ from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone import ServerlessSpec
 from pinecone import Index
 
+DEFAULT_METRIC = "cosine"
 
 class GameDatabase:
     @staticmethod
@@ -25,22 +26,19 @@ class GameDatabase:
 
         return records
 
-    def __init__(self, api_key: str, dimension: int = 1024):
+    def __init__(self, api_key: str, indexes: dict[str, int] = None):
         self.pc = Pinecone(api_key=api_key)
-        self._dimension = dimension
-        self._create_main_index()
         self._namespace = "steam-games"
+        self._indexes = dict()
+        if indexes:
+            for key, value in indexes.items():
+                self._create_index(index_name=key, dimension=value, metric=DEFAULT_METRIC)
 
-    @property
-    def index(self) -> Index:
-        return self._main_index
-
-    def get_similarity(self, name: str, embedding: np.ndarray):
-        index = self._main_index
-        namespace = self._namespace
+    def get_similarity(self, index_name: str, name: str, embedding: np.ndarray):
+        index = self._get_index(index_name)
 
         results = index.query(
-            namespace=namespace,
+            namespace=self._namespace,
             vector=embedding,
             top_k=1,
             filter={"Name": {"$eq": name}},
@@ -53,8 +51,8 @@ class GameDatabase:
 
         return results["matches"][0]
 
-    def get_similar(self, embedding: np.ndarray, k: int = 1):
-        index = self._main_index
+    def get_similar(self, index_name:str, embedding: np.ndarray, k: int = 1):
+        index = self._get_index(index_name)
         namespace = self._namespace
 
         results = index.query(
@@ -67,53 +65,48 @@ class GameDatabase:
 
         return results["matches"]
 
-    def get_by_id(self, id_: str):
-        index = self._main_index
-        namespace = self._namespace
+    def get_by_id(self, index_name: str, id_: str):
+        index = self._get_index(index_name)
 
         results = index.fetch(
-            namespace=namespace,
+            namespace=self._namespace,
             ids=[id_],
         )
 
         return results["vectors"][id_]
 
-    def get_ids(self):
+    def get_ids(self, index_name: str):
         all_ids = []
-        for page in list(self._main_index.list(namespace=self._namespace)):
+        for page in list(self._get_index(index_name).list(namespace=self._namespace)):
             all_ids.extend(page)
         return all_ids
 
-
-    def get_random(self):
-        ids = self.get_ids()
-        id_ = np.random.choice(ids)
-        return self.get_by_id(id_)
-
-    def load_data(self, ids: list[str], data: list[dict], embeddings: list):
+    def load_data(self, index_name: str, ids: list[str], data: list[dict], embeddings: list, slice_size: int = 100):
         records = GameDatabase._prepare_records(ids, data, embeddings)
         if len(records) < 1:
             return
 
-        self._clear_data()
-        self._create_main_index()
+        self._clear_data(index_name=index_name)
+        
+        dimension = len(embeddings[0])
+        index = self._create_index(index_name=index_name, dimension=dimension, metric=DEFAULT_METRIC)
 
-        step = 100
+        step = slice_size
         from_i, to_i = 0, 0
         while from_i < len(records):
             to_i += step
             to_i = min(to_i, len(records))
             print(f"Inserting records {from_i + 1} to {to_i}")
             self._upsert_records(
-                namespace=self._namespace, index=self._main_index, records=records
+                namespace=self._namespace, index=index, records=records[from_i:to_i]
             )
             from_i = to_i
 
-    def describe_index(self):
-        return self._main_index.describe_index_stats()
+    def describe_index(self, index_name: str):
+        return self._get_index(index_name).describe_index_stats()
 
-    def _clear_data(self):
-        self._delete_index("game-index")
+    def _clear_data(self, index_name: str):
+        self._delete_index(index_name=index_name)
 
     def _create_index(self, index_name: str, dimension: int, metric: str):
         if not self.pc.has_index(index_name):
@@ -127,16 +120,17 @@ class GameDatabase:
         # Wait for the index to be ready
         while not self.pc.describe_index(index_name).status["ready"]:
             time.sleep(1)
-
-        return self.pc.Index(index_name)
-
-    def _create_main_index(self):
-        self._main_index = self._create_index(
-            "game-index", dimension=self._dimension, metric="cosine"
-        )
+        
+        self._indexes[index_name] = self.pc.Index(index_name)
+        return self._get_index(index_name)
 
     def _delete_index(self, index_name: str):
+        if not self.pc.has_index(index_name):
+            return
         self.pc.delete_index(index_name)
 
     def _upsert_records(self, namespace: str, index: Index, records: list[dict]):
         index.upsert(vectors=records, namespace=namespace)
+
+    def _get_index(self, index_name: str):
+        return self._indexes[index_name]

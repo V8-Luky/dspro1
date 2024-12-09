@@ -7,7 +7,7 @@ class GameData:
     def __init__(self, games: pd.DataFrame, embedder: GameEmbedder):
         self._games = games
         self._embedder = embedder
-        self._embeddings = embedder.create_embeddings(self._games)        
+        self._embeddings = self._embedder.create_embeddings(self._games)
 
     @property
     def ids(self):
@@ -19,4 +19,5 @@ class GameData:
 
     @property
     def metadata(self):
-        return self._games.to_dict(orient="records")
+        games = self._games.drop(columns=["About the game","Positive", "Negative", "Estimated owners"])
+        return games.to_dict(orient="records")
