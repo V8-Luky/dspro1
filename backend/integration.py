@@ -1,6 +1,6 @@
 import numpy as np
 
-from backend.dto import GameGuessResponse, HintResponse, GamesResponse
+from backend.dto import GameGuessResponse, HintResponse, GamesResponse, GameResponse
 from database.game_database import GameDatabase
 from logic.daily_target_game import DailyTargetGame
 from logic.game import Game
@@ -58,6 +58,11 @@ class Integration:
         hint = self._hint_generator.generate_hint(target_game_name=target_game_name, guessed_game_name=game_name)
 
         return HintResponse(hint=hint)
+
+    def get_target_game(self) -> GameResponse:
+        target_game_record = self._get_or_update_game().get_target_game(self._get_first_index_name())
+        target_game = Game.from_metadata(target_game_record[METADATA_NAME])
+        return GameResponse(game=target_game)
 
     def _get_or_update_game(self) -> DailyTargetGame:
         if not self._game or self._game.is_expired():
