@@ -60,7 +60,7 @@ class Integration:
         return HintResponse(hint=hint)
 
     def get_target_game(self) -> GameResponse:
-        target_game_record = self._get_or_update_game().target_game
+        target_game_record = self._get_or_update_game().get_target_game(self._get_first_index_name())
         target_game = Game.from_metadata(target_game_record[METADATA_NAME])
         return GameResponse(game=target_game)
 
