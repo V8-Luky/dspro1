@@ -10,7 +10,7 @@ class GameResponse(Serializable):
         self.categories = self._make_set_serializable(game.categories)
         self.genres = self._make_set_serializable(game.genres)
         self.tags = self._make_set_serializable(game.tags)
-        self.release_date = game.release_date
+        self.release_date = game.release_date.isoformat()
 
     def _make_set_serializable(self, set_: set) -> list:
         return list(set_)
