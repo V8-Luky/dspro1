@@ -9,9 +9,7 @@ from logic.hint_generator import HintGenerator
 app = Flask(__name__)
 CORS(app)
 
-DIMENSIONALITY = 384
-
-database = GameDatabase(api_key=pinecone_api_key, dimension=DIMENSIONALITY)
+database = GameDatabase(api_key=pinecone_api_key, indexes={"description-index": 768, "tags-index": 300})
 hint_generator = HintGenerator(api_key=gemini_api_key)
 
 integration = Integration(database=database, hint_generator=hint_generator)
