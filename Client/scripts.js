@@ -6,7 +6,9 @@ async function initializeGame() {
     try {
         // Fetch all games
         const allGamesResponse = await fetchGames(); // Using fetchGames from fetching.js
+
         data = allGamesResponse.games // Populate the data array
+
         console.log("Fetched games:", data);
 
     } catch (error) {
@@ -28,8 +30,6 @@ dropdown.id = "autocompleteDropdown";
 dropdown.classList.add("dropdown");
 document.body.appendChild(dropdown);
 
-
-
 // Autocomplete suggestions on input change
 guessInput.addEventListener("input", () => {
     const userInput = guessInput.value.trim().toLowerCase();
@@ -40,9 +40,10 @@ guessInput.addEventListener("input", () => {
     }
 });
 
+
 // Event listener for the submit button
 document.getElementById("guessButton").addEventListener("click", () => {
-    const userGuess = document.getElementById("guessInput").value.trim();
+    const userGuess = guessInput.value.trim();
     if (userGuess) {
         makeGuess(userGuess); // Call makeGuess with the user input
         document.getElementById("guessInput").value = ""; // Clear the input field
@@ -57,6 +58,7 @@ document.getElementById("guessInput").addEventListener("keydown", (event) => {
             makeGuess(userGuess);
             event.target.value = "";
         }
+
     }
 });
 
@@ -84,6 +86,7 @@ document.getElementById("hintButton").addEventListener("click", () => {
 document.getElementById("giveUpButton").addEventListener("click", () => {
     alert("You gave up! The correct answer is: " + secretGame.Name);
 });
+
 
 function processFeedback(feedback) {
     const tableBody = document.getElementById("guessTableBody");
@@ -162,6 +165,7 @@ function createMatchMismatchCell(data) {
     return cell;
 }
 
+
 // Helper function to create the release date cell
 function createReleaseDateCell(releaseData) {
     const cell = document.createElement("td");
@@ -212,20 +216,18 @@ function getSimilarityColor(similarity) {
 // Show autocomplete suggestions
 function showSuggestions(input) {
     // Filter game names that include the input substring
+
     const matches = data
         .filter(name => name.trim().toLowerCase().includes(input)) // Case-insensitive matching
         .slice(0, 10); // Limit to the first 10 matches
 
-    // Clear previous suggestions
     dropdown.innerHTML = "";
 
-    // If no matches, hide the dropdown
     if (matches.length === 0) {
         dropdown.style.display = "none";
         return;
     }
 
-    // Show the dropdown and position it below the input field
     const inputRect = guessInput.getBoundingClientRect();
     dropdown.style.left = `${inputRect.left}px`;
     dropdown.style.top = `${inputRect.bottom}px`;
@@ -243,11 +245,9 @@ function showSuggestions(input) {
             guessInput.value = match.trim();
             dropdown.style.display = "none";
         });
-
         dropdown.appendChild(suggestionItem);
     });
 }
-
 
 // Show modal and trigger confetti animation
 function showCongratsModal() {

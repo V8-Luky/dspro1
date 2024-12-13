@@ -34,7 +34,9 @@ async function makeGuess(gameName) {
 
         const result = await response.json();
         console.log("Guess Result:", result);
+
         processFeedback(result);
+      
         return result; // Return the guess result
     } catch (error) {
         console.error("Error making a guess:", error);
