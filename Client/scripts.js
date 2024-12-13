@@ -6,7 +6,9 @@ async function initializeGame() {
     try {
         // Fetch all games
         const allGamesResponse = await fetchGames(); // Using fetchGames from fetching.js
-        data = allGamesResponse; // Populate the data array
+
+        data = allGamesResponse.games // Populate the data array
+
         console.log("Fetched games:", data);
 
     } catch (error) {
@@ -28,17 +30,6 @@ dropdown.id = "autocompleteDropdown";
 dropdown.classList.add("dropdown");
 document.body.appendChild(dropdown);
 
-// Event listener for "Enter" key on the input field
-guessInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-        const userGuess = guessInput.value.trim();
-        if (userGuess) {
-            compareWithSecretGame(userGuess);
-            guessInput.value = ""; // Clear the input field
-        }
-    }
-});
-
 // Autocomplete suggestions on input change
 guessInput.addEventListener("input", () => {
     const userInput = guessInput.value.trim().toLowerCase();
@@ -49,12 +40,25 @@ guessInput.addEventListener("input", () => {
     }
 });
 
-// Submit guess button functionality
+
+// Event listener for the submit button
 document.getElementById("guessButton").addEventListener("click", () => {
     const userGuess = guessInput.value.trim();
     if (userGuess) {
-        compareWithSecretGame(userGuess);
-        guessInput.value = "";
+        makeGuess(userGuess); // Call makeGuess with the user input
+        document.getElementById("guessInput").value = ""; // Clear the input field
+    }
+});
+
+// Add an event listener for the "Enter" key
+document.getElementById("guessInput").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        const userGuess = event.target.value.trim();
+        if (userGuess) {
+            makeGuess(userGuess);
+            event.target.value = "";
+        }
+
     }
 });
 
@@ -83,76 +87,142 @@ document.getElementById("giveUpButton").addEventListener("click", () => {
     alert("You gave up! The correct answer is: " + secretGame.Name);
 });
 
-// Add guessed game details to the table
-function addGuessToTable(guessedGame) {
+
+function processFeedback(feedback) {
     const tableBody = document.getElementById("guessTableBody");
     const row = document.createElement("tr");
 
-    // Create and append cells
-    row.appendChild(createComparisonCell(guessedGame.Name, secretGame.Name));
-    row.appendChild(createComparisonCell(guessedGame.Genres, secretGame.Genres, true));
-    row.appendChild(createComparisonCell(guessedGame.Categories, secretGame.Categories, true));
-    row.appendChild(createComparisonCell(guessedGame.Developers, secretGame.Developers));
-    row.appendChild(createComparisonCell(guessedGame.Publishers, secretGame.Publishers));
-    row.appendChild(createReleaseDateCell(guessedGame["Release date"], secretGame["Release date"]));
+    // Name Cell
+    const nameCell = document.createElement("td");
+    nameCell.innerHTML = feedback.name; // Display the guessed name
+    nameCell.classList.add(feedback.is_correct ? "correct" : "incorrect"); // Green if correct
+    row.appendChild(nameCell);
 
-    tableBody.appendChild(row);
+    // Genres Cell
+    const genresCell = createMatchMismatchCell(feedback.genres);
+    row.appendChild(genresCell);
+
+    // Categories Cell
+    const categoriesCell = createMatchMismatchCell(feedback.categories);
+    row.appendChild(categoriesCell);
+
+    // Tags Cell
+    const tagsCell = createMatchMismatchCell(feedback.tags);
+    row.appendChild(tagsCell);
+
+    // Developers Cell
+    const developersCell = createMatchMismatchCell(feedback.developers);
+    row.appendChild(developersCell);
+
+    // Publishers Cell
+    const publishersCell = createMatchMismatchCell(feedback.publishers);
+    row.appendChild(publishersCell);
+
+    // Release Date Cell
+    const releaseDateCell = createReleaseDateCell(feedback.release_date);
+    row.appendChild(releaseDateCell);
+
+    const similarityCell = createSimilarityCell(feedback.similarity);
+    row.appendChild(similarityCell);
+
+    // Append the row to the table body
+    tableBody.prepend(row);
+
+    if (feedback.is_correct) {
+        showCongratsModal();
+    }
 }
 
-// Create a comparison cell with color-coded matches
-function createComparisonCell(guessedValue, secretValue, isList = false) {
+// Helper function to create cells for match/mismatch
+function createMatchMismatchCell(data) {
     const cell = document.createElement("td");
 
-    if (isList) {
-        const guessedItems = guessedValue.split(", ").map(item => item.toLowerCase());
-        const secretItems = secretValue.split(", ").map(item => item.toLowerCase());
-        cell.innerHTML = guessedItems
-            .map(item => (secretItems.includes(item) ? `<span class="correct">${item}</span>` : `<span class="incorrect">${item}</span>`))
-            .join(", ");
+    const matchItems = data.match.map(
+        item => `<span class="correct">${item}</span>`
+    ).join(", ");
+
+    const mismatchItems = data.mismatch.map(
+        item => `<span class="incorrect">${item}</span>`
+    ).join(", ");
+
+    let cellContent = "";
+
+    if (matchItems && mismatchItems) {
+        // Both matchItems and mismatchItems are not empty
+        cellContent = `${matchItems}, ${mismatchItems}`;
+    } else if (matchItems) {
+        // Only matchItems is not empty
+        cellContent = `${matchItems}`;
+    } else if (mismatchItems) {
+        // Only mismatchItems is not empty
+        cellContent = `${mismatchItems}`;
     } else {
-        cell.innerHTML =
-            guessedValue.toLowerCase() === secretValue.toLowerCase()
-                ? `<span class="correct">${guessedValue}</span>`
-                : `<span class="incorrect">${guessedValue}</span>`;
+        // Both are empty; you can choose to display a placeholder or leave it empty
+        cellContent = ""; // Or use "N/A" if you prefer
     }
+
+    cell.innerHTML = cellContent;
+    return cell;
+}
+
+
+// Helper function to create the release date cell
+function createReleaseDateCell(releaseData) {
+    const cell = document.createElement("td");
+
+    const guessedDate = releaseData.guessed || "N/A";
+    const arrowDirection = releaseData.target_direction === -1 ? "↓" : "↑";
+
+    const dateText = releaseData.target_direction !== 0
+        ?`<span class = incorrect>${guessedDate}</span>`
+        :`<span class = correct>${guessedDate}</span>`;
+    const arrow = releaseData.target_direction !== 0
+        ? `<span style="color: red;">${arrowDirection}</span>`
+        : "";
+
+    cell.innerHTML = `${dateText} ${arrow}`;
+    return cell;
+}
+
+function createSimilarityCell(similarity) {
+    const cell = document.createElement("td");
+    const color = getSimilarityColor(similarity);
+
+    // Style the cell background and text
+    cell.style.background = color;
+    cell.style.color = "black"; // Ensure text is readable
+    cell.style.textAlign = "center";
+    cell.style.fontWeight = "bold";
+    cell.textContent = `${(similarity * 100).toFixed(1)}%`; // Display percentage
 
     return cell;
 }
 
-// Create a release date cell with an arrow indicator
-function createReleaseDateCell(guessedDate, secretDate) {
-    const cell = document.createElement("td");
-    const dateText = document.createElement("span");
-    dateText.textContent = guessedDate || "N/A";
-
-    const arrow = document.createElement("span");
-    arrow.textContent = "↑";
-    arrow.style.color = "red";
-    arrow.style.marginLeft = "5px";
-
-    const guessedDateObj = new Date(guessedDate);
-    const secretDateObj = new Date(secretDate);
-
-    if (guessedDateObj.getTime() === secretDateObj.getTime()) {
-        dateText.classList.add("correct");
-        arrow.style.display = "none";
+function getSimilarityColor(similarity) {
+    // Gradient from red (0) to yellow (0.5) to green (1)
+    if (similarity <= 0.5) {
+        // Transition from red to yellow
+        const red = 255;
+        const green = Math.floor(255 * (similarity / 0.5));
+        return `rgb(${red}, ${green}, 0)`;
     } else {
-        dateText.classList.add("incorrect");
-        arrow.textContent = guessedDateObj > secretDateObj ? "↓" : "↑";
+        // Transition from yellow to green
+        const red = Math.floor(255 * ((1 - similarity) / 0.5));
+        const green = 255;
+        return `rgb(${red}, ${green}, 0)`;
     }
-
-    cell.appendChild(dateText);
-    cell.appendChild(arrow);
-    return cell;
 }
 
 // Show autocomplete suggestions
 function showSuggestions(input) {
+    // Filter game names that include the input substring
+
     const matches = data
-        .filter(game => game.Name.toLowerCase().includes(input))
-        .slice(0, 10);
+        .filter(name => name.trim().toLowerCase().includes(input)) // Case-insensitive matching
+        .slice(0, 10); // Limit to the first 10 matches
 
     dropdown.innerHTML = "";
+
     if (matches.length === 0) {
         dropdown.style.display = "none";
         return;
@@ -164,12 +234,15 @@ function showSuggestions(input) {
     dropdown.style.width = `${inputRect.width}px`;
     dropdown.style.display = "block";
 
+    // Populate dropdown with matching game names
     matches.forEach(match => {
         const suggestionItem = document.createElement("div");
         suggestionItem.classList.add("suggestion-item");
-        suggestionItem.textContent = match.Name;
+        suggestionItem.textContent = match.trim(); // Trim any leading/trailing whitespace
+
+        // When a suggestion is clicked, fill the input field and hide the dropdown
         suggestionItem.addEventListener("click", () => {
-            guessInput.value = match.Name;
+            guessInput.value = match.trim();
             dropdown.style.display = "none";
         });
         dropdown.appendChild(suggestionItem);
