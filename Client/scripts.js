@@ -286,8 +286,6 @@ function triggerConfetti() {
     })();
 }
 
-
-
 document.getElementById("hintItem").addEventListener("click", async () => {
     const hintBox = document.getElementById("hintBox");
 
@@ -364,5 +362,4 @@ function addCorrectGameToTable(game) {
     // Prepend the correct game to the table
     tableBody.prepend(row);
 }
-
 
