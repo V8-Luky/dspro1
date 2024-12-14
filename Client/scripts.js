@@ -1,5 +1,6 @@
 // Select a random secret game
 let data = []; // To hold the fetched games
+let lastGuess = null; // Variable to store the last guess
 
 // Fetch the games using the fetchGames function from fetching.js
 async function initializeGame() {
@@ -45,6 +46,7 @@ guessInput.addEventListener("input", () => {
 document.getElementById("guessButton").addEventListener("click", () => {
     const userGuess = guessInput.value.trim();
     if (userGuess) {
+        lastGuess = userGuess; // Save the last guess
         makeGuess(userGuess); // Call makeGuess with the user input
         document.getElementById("guessInput").value = ""; // Clear the input field
     }
@@ -77,16 +79,6 @@ document.addEventListener("click", (event) => {
         dropdownMenu.style.display = "none";
     }
 });
-
-// Dropdown button actions
-document.getElementById("hintButton").addEventListener("click", () => {
-    alert("Here's a hint!");
-});
-
-document.getElementById("giveUpButton").addEventListener("click", () => {
-    alert("You gave up! The correct answer is: " + secretGame.Name);
-});
-
 
 function processFeedback(feedback) {
     const tableBody = document.getElementById("guessTableBody");
@@ -293,3 +285,25 @@ function triggerConfetti() {
         }
     })();
 }
+
+
+document.getElementById("hintItem").addEventListener("click", async () => {
+    const hintBox = document.getElementById("hintBox");
+
+    try {
+        if (!lastGuess) {
+            hintBox.textContent = "Enter a guess first to get a hint!";
+            return;
+        }
+
+        const hintText = await hint(lastGuess); // Assuming hint() returns a string
+        hintBox.textContent = hintText.hint;
+    } catch (error) {
+        hintBox.textContent = "Unable to fetch a hint. Try again later.";
+    }
+});
+
+
+document.getElementById("giveUpItem").addEventListener("click", () => {
+    alert("You gave up! The correct answer will now be revealed.");
+});
