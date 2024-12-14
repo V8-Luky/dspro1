@@ -163,7 +163,7 @@ function createReleaseDateCell(releaseData) {
     const cell = document.createElement("td");
 
     const guessedDate = releaseData.guessed || "N/A";
-    const arrowDirection = releaseData.target_direction === -1 ? "↓" : "↑";
+    const arrowDirection = releaseData.target_direction === 1 ? "↓" : "↑";
 
     const dateText = releaseData.target_direction !== 0
         ?`<span class = incorrect>${guessedDate}</span>`
@@ -287,6 +287,7 @@ function triggerConfetti() {
 }
 
 
+
 document.getElementById("hintItem").addEventListener("click", async () => {
     const hintBox = document.getElementById("hintBox");
 
@@ -304,6 +305,64 @@ document.getElementById("hintItem").addEventListener("click", async () => {
 });
 
 
-document.getElementById("giveUpItem").addEventListener("click", () => {
-    alert("You gave up! The correct answer will now be revealed.");
+document.getElementById("giveUpItem").addEventListener("click", async () => {
+    try {
+        const correctGame = await fetchSecretGame()
+        addCorrectGameToTable(correctGame);
+    } catch (error) {
+
+    }
 });
+
+
+function addCorrectGameToTable(game) {
+    const tableBody = document.getElementById("guessTableBody");
+    const row = document.createElement("tr");
+
+    // Helper function to safely join array data or return "N/A"
+    const safeJoin = (array) => Array.isArray(array) && array.length > 0 ? array.join(", ") : "N/A";
+
+    // Name Cell
+    const nameCell = document.createElement("td");
+    nameCell.innerHTML = `<span class="correct">${game.name || "N/A"}</span>`;
+    row.appendChild(nameCell);
+
+    // Genres Cell
+    const genresCell = document.createElement("td");
+    genresCell.innerHTML = `<span class="correct">${safeJoin(game.genres)}</span>`;
+    row.appendChild(genresCell);
+
+    // Categories Cell
+    const categoriesCell = document.createElement("td");
+    categoriesCell.innerHTML = `<span class="correct">${safeJoin(game.categories)}</span>`;
+    row.appendChild(categoriesCell);
+
+    // Tags Cell
+    const tagsCell = document.createElement("td");
+    tagsCell.innerHTML = `<span class="correct">${safeJoin(game.tags)}</span>`;
+    row.appendChild(tagsCell);
+
+    // Developers Cell
+    const developersCell = document.createElement("td");
+    developersCell.innerHTML = `<span class="correct">${safeJoin(game.developers)}</span>`;
+    row.appendChild(developersCell);
+
+    // Publishers Cell
+    const publishersCell = document.createElement("td");
+    publishersCell.innerHTML = `<span class="correct">${safeJoin(game.publishers)}</span>`;
+    row.appendChild(publishersCell);
+
+    // Release Date Cell
+    const releaseDateCell = document.createElement("td");
+    releaseDateCell.innerHTML = `<span class="correct">${game.release_date || "N/A"}</span>`;
+    row.appendChild(releaseDateCell);
+
+    // Similarity Cell
+    const similarityCell = createSimilarityCell(1); // Pass 1 for 100% similarity
+    row.appendChild(similarityCell);
+
+    // Prepend the correct game to the table
+    tableBody.prepend(row);
+}
+
+

@@ -12,7 +12,6 @@ async function fetchGames() {
         }
 
         const games = await response.json();
-        console.log("Fetched Games:", games);
         return games; // Return the games list
     } catch (error) {
         console.error("Error fetching games:", error);
@@ -33,7 +32,6 @@ async function makeGuess(gameName) {
          */
 
         const result = await response.json();
-        console.log("Guess Result:", result);
 
         processFeedback(result);
       
@@ -57,7 +55,6 @@ async function hint(gameName) {
          */
 
         const result = await response.json();
-        console.log("Guess Result:", result);
         return result; // Return the guess result
     } catch (error) {
         console.error("Error making a guess:", error);
