@@ -23,6 +23,7 @@ initializeGame();
 // Modal elements
 const congratsModal = document.getElementById("congratsModal");
 const closeModal = document.getElementById("closeModal");
+const guessButton = document.getElementById("guessButton");
 
 // Input field and dropdown container
 const guessInput = document.getElementById("guessInput");
@@ -41,26 +42,22 @@ guessInput.addEventListener("input", () => {
     }
 });
 
+// Handle Submit button click
+guessButton.addEventListener("click", async () => {
+    if (guessButton.disabled) return;
 
-// Event listener for the submit button
-document.getElementById("guessButton").addEventListener("click", () => {
-    const userGuess = guessInput.value.trim();
-    if (userGuess) {
-        lastGuess = userGuess; // Save the last guess
-        makeGuess(userGuess); // Call makeGuess with the user input
-        document.getElementById("guessInput").value = ""; // Clear the input field
-    }
+    // Trigger the guess submission with the first match
+    await submitFirstMatchingGame();
 });
 
 // Add an event listener for the "Enter" key
-document.getElementById("guessInput").addEventListener("keydown", (event) => {
+guessInput.addEventListener("keydown", async (event) => {
     if (event.key === "Enter") {
-        const userGuess = event.target.value.trim();
-        if (userGuess) {
-            makeGuess(userGuess);
-            event.target.value = "";
-        }
+        // Prevent submission if the button is disabled
+        if (guessButton.disabled) return;
 
+        // Trigger the guess submission with the first match
+        await submitFirstMatchingGame();
     }
 });
 
@@ -245,6 +242,7 @@ function showSuggestions(input) {
 function showCongratsModal() {
     congratsModal.style.display = "flex";
     triggerConfetti();
+    disableSubmitButton();
 }
 
 // Close modal functionality
@@ -306,6 +304,7 @@ document.getElementById("hintItem").addEventListener("click", async () => {
 document.getElementById("giveUpItem").addEventListener("click", async () => {
     try {
         const correctGame = await fetchSecretGame()
+        disableSubmitButton();
         addCorrectGameToTable(correctGame);
     } catch (error) {
 
@@ -363,3 +362,29 @@ function addCorrectGameToTable(game) {
     tableBody.prepend(row);
 }
 
+// Function to disable the submit button
+function disableSubmitButton() {
+    guessButton.disabled = true;
+    guessButton.style.backgroundColor = "#555"; // Optional: Change color to indicate disabled state
+    guessButton.style.cursor = "not-allowed"; // Optional: Change cursor to indicate disabled state
+}
+
+// Function to find the first matching game and make the API call
+async function submitFirstMatchingGame() {
+    const userInput = guessInput.value.trim().toLowerCase();
+
+    // Hide the dropdown
+    dropdown.style.display = "none";
+
+    const firstMatch = data
+        .filter(name => name.trim().toLowerCase().includes(userInput))
+        .slice(0, 1);
+
+    if (firstMatch) {
+        // Use the first match and make the API call
+        await makeGuess(firstMatch);
+        guessInput.value = ""; // Clear the input field
+    } else {
+        alert("No matching game found! Please try a different guess.");
+    }
+}
