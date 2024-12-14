@@ -290,6 +290,17 @@ h1 {
     color: #1b1b2f;
 }
 
+.correct-answer-row {
+    background-color: #4ecca3; /* Highlight row with green background */
+    color: #1b1b2f; /* Text color for better contrast */
+}
+
+.correct-answer-row td {
+    font-weight: bold;
+    border: 1px solid #1b1b2f; /* Optional border for emphasis */
+}
+
+
 
 .hint-success {
     background-color: #4ecca3;
@@ -356,3 +367,14 @@ h1 {
     width: 20px;
     height: 20px;
 }
+
+.correct-answer-row {
+    background-color: #4ecca3; /* Highlight row with green background */
+    color: #1b1b2f; /* Text color for better contrast */
+}
+
+.correct-answer-row td {
+    font-weight: bold;
+    border: 1px solid #1b1b2f; /* Optional border for emphasis */
+}
+
