@@ -8,14 +8,14 @@ from database import api_key as pinecone_api_key, GameDatabase
 from genai import api_key as gemini_api_key
 from logic import HintGenerator
 
-### Constants
+# Constants
 SUCCESS = 200
 BAD_REQUEST = 400
 NOT_FOUND = 404
 
 NAME_QUERY = "name"
 
-### Helper functions
+# Helper functions
 
 
 def get_name_from_request(req: Request) -> str | None:
@@ -30,18 +30,22 @@ def get_no_name_error() -> tuple[str, int]:
     return 'Must provide a "name" query parameter', BAD_REQUEST
 
 
-### Initialize the Flask app
+# Initialize the Flask app
 app = Flask(__name__)
 CORS(app)
 
-### Initialize the integration
+# Initialize the integration
+INDEXES = {"description-index": {"dimension": 768, "weight": 0.5},
+           "tags-index": {"dimension": 300, "weight": 0.5}}
+
 database = GameDatabase(api_key=pinecone_api_key, indexes={
-                        "description-index": 768, "tags-index": 300})
+                        index_name: index_value["dimension"] for index_name, index_value in INDEXES.items()})
 hint_generator = HintGenerator(api_key=gemini_api_key)
 
-integration = Integration(database=database, hint_generator=hint_generator)
+integration = Integration(database=database, hint_generator=hint_generator, indexes={
+                          index_name: index_value["weight"] for index_name, index_value in INDEXES.items()})
 
-### The api endpoints
+# The api endpoints
 
 
 @app.route("/games", methods=["GET"])

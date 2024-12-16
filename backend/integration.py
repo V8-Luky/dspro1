@@ -13,12 +13,6 @@ METADATA_NAME = "metadata"
 SCORE_NAME = "score"
 VALUES_NAME = "values"
 
-INDEXES = {
-    "description-index": 0.5,
-    "tags-index": 0.5
-}
-
-
 class Integration:
     """Implements the main game logic by integrating and combining all the components.
 
@@ -29,7 +23,7 @@ class Integration:
         game: The current game that has to be guessed.
     """
 
-    def __init__(self, database: GameDatabase, hint_generator: HintGenerator, indexes: dict[str, float] = INDEXES) -> None:
+    def __init__(self, database: GameDatabase, hint_generator: HintGenerator, indexes: dict[str, float]) -> None:
         self._database = database
         self._hint_generator = hint_generator
         self._game_names = []
