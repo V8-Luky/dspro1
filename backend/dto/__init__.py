@@ -1,4 +1,6 @@
-from .hint_response import *
-from .game_guess_response import *
-from .games_response import *
-from .game_response import *
+"""Contains all the DTOs for the backend."""
+
+from .hint_response import HintResponse
+from .game_guess_response import GameGuessResponse
+from .games_response import GamesResponse
+from .game_response import GameResponse
