@@ -54,13 +54,15 @@ class Integration:
         Args:
             game_name (str): The name of the game guessed by the player.
         Returns:
-            HintResponse: An object containing the generated hint.
+            HintResponse: An object containing the generated hint or None if the hint could not be generated.
         """
         target_game_name = self._get_or_update_game().get_target_game(
             self._get_first_index_name())[METADATA_NAME]["Name"]
 
         hint = self._hint_generator.generate_hint(
             target_game_name=target_game_name, guessed_game_name=game_name)
+        if not hint:
+            return None
 
         return HintResponse(hint=hint)
 
@@ -83,8 +85,9 @@ class Integration:
         Args:
             game_name (str): The name of the game guessed by the player.
         Returns:
-            GameGuessResponse: An object containing the comparison between the target game and the guessed game, 
-                               and the weighted similarity score.
+            GameGuessResponse: An object containing the comparison between the target game and 
+                the guessed game, and the weighted similarity score. Returns None if no 
+                similarity score could be calculated.
         """
 
         scores = list()
@@ -102,6 +105,9 @@ class Integration:
 
             scores.append(float(guessed_game_record[SCORE_NAME]))
             weights.append(weight)
+
+        if len(scores) == 0:
+            return None
 
         score = self._get_weighted_similarity(
             similarity_scores=scores, weights=weights)
