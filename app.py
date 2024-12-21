@@ -9,9 +9,7 @@ from logic.hint_generator import HintGenerator
 app = Flask(__name__)
 CORS(app)
 
-DIMENSIONALITY = 384
-
-database = GameDatabase(api_key=pinecone_api_key, dimension=DIMENSIONALITY)
+database = GameDatabase(api_key=pinecone_api_key, indexes={"description-index": 768, "tags-index": 300})
 hint_generator = HintGenerator(api_key=gemini_api_key)
 
 integration = Integration(database=database, hint_generator=hint_generator)
@@ -26,7 +24,7 @@ NAME_QUERY = "name"
 def get_name_from_request(req: Request) -> str | None:
     if NAME_QUERY not in req.args:
         return None
-    return req.args.get("name").strip('"')
+    return req.args.get(NAME_QUERY).strip('"')
 
 
 def get_no_name_error() -> tuple[str, int]:
@@ -60,6 +58,10 @@ def get_hint():
         return f"No hint for game with name {name} found", NOT_FOUND
 
     return hint.to_json(), SUCCESS
+
+@app.route("/target", methods=["GET"])
+def get_target_game():
+    return integration.get_target_game().to_json(), SUCCESS
 
 
 if __name__ == '__main__':

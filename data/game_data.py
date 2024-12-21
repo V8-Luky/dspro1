@@ -7,20 +7,17 @@ class GameData:
     def __init__(self, games: pd.DataFrame, embedder: GameEmbedder):
         self._games = games
         self._embedder = embedder
-        self._embeddings = embedder.create_game_embeddings(self._games)
-
-    @property
-    def embedding_dimension(self):
-        return int(self._embeddings.shape[1])
+        self._embeddings = self._embedder.create_embeddings(self._games)
 
     @property
     def ids(self):
-        return list(map(lambda s: ''.join(i for i in s if ord(i) < 128), map(str, self._games["Name"].tolist())))
+        return self._games["Name"].tolist()
 
     @property
     def embeddings(self):
-        return self._embeddings
+        return [list(row) for row in self._embeddings]
 
     @property
     def metadata(self):
-        return self._games.to_dict(orient="records")
+        games = self._games.drop(columns=["About the game","Positive", "Negative", "Estimated owners"])
+        return games.to_dict(orient="records")

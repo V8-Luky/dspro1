@@ -1,14 +1,13 @@
-from datetime import datetime, date
+from datetime import datetime
 
 
-class DailyGame:
-    def __init__(self, target_game) -> None:
+class DailyTargetGame:
+    def __init__(self, target_game_records: dict) -> None:
         self._start_time = datetime.now().date()
-        self._target_game = target_game
+        self._target_game_records = target_game_records
 
-    @property
-    def target_game(self):
-        return self._target_game
+    def get_target_game(self, key: str):
+        return self._target_game_records[key]
 
     def is_expired(self) -> bool:
         today = datetime.now().date()
