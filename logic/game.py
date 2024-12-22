@@ -1,9 +1,32 @@
+"""Provides a class to represent a game with all its metadata."""
+
 from datetime import date
 
 
-class Game():
+class Game:
+    """
+    Represents a game with all its metadata for more strongly typed access.
+
+    Attributes:
+        name: The name of the game.
+        developers: The developers of the game.
+        publishers: The publishers of the game.
+        categories: The categories of the game.
+        genres: The genres of the game.
+        tags: The tags of the game.
+        release_date: The release date of the game.
+    """
+
     @staticmethod
     def from_metadata(metadata: dict) -> 'Game':
+        """
+        Creates a Game object from a metadata dictionary.
+
+        Args:
+            metadata: The metadata dictionary.
+        Returns:
+            Game: The Game object.
+        """
         return Game(
             name=metadata["Name"],
             developers=Game._convert_string_to_set(metadata["Developers"]),
@@ -26,5 +49,3 @@ class Game():
         self.genres = genres
         self.tags = tags
         self.release_date = release_date
-
-
