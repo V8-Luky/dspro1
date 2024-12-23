@@ -1,6 +1,6 @@
 """Contains the DTO class for the response of a game request."""
 
-from logic.game import Game
+from ..logic.game import Game
 
 from .serializable import Serializable
 

@@ -1,6 +1,6 @@
 """Responsible for generating hints for the player to guess the targeted game."""
 
-from genai.gen_ai_model import GenAIModel
+from ..genai.gen_ai_model import GenAIModel
 
 DEFAULT_HINT_PROMPT = """
 The player of a game has to guess the following game: {target_game_name}
