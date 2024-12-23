@@ -17,7 +17,7 @@ class DescriptionEmbedder(GameEmbedder):
     def __init__(self):
         super().__init__(SentenceTransformer("all-mpnet-base-v2"))
 
-    def create_embeddings(self, games: DataFrame) -> ndarray:
+    def create_embeddings(self, games: DataFrame) -> list[ndarray]:
         games['sentences'] = games["About the game"].apply(
             self._string_to_sentences)
         embeddings = games['sentences'].apply(
