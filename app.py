@@ -3,10 +3,10 @@
 from flask import Flask, Request, request
 from flask_cors import CORS
 
-from backend import Integration
-from .database import api_key as pinecone_api_key, GameDatabase
-from .genai import api_key as gemini_api_key
-from .logic import HintGenerator
+from backend.database import api_key as pinecone_api_key, GameDatabase
+from backend.integration import Integration
+from backend.genai import api_key as gemini_api_key
+from backend.logic import HintGenerator
 
 # Constants
 SUCCESS = 200
