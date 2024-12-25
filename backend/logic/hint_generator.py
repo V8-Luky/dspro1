@@ -4,11 +4,11 @@ from ..genai.gen_ai_model import GenAIModel
 
 DEFAULT_HINT_PROMPT = """
 The player of a game has to guess the following game: {target_game_name}
-The player has falsly guessed: {guessed_game_name}
+The player has falsely guessed: {guessed_game_name}
 Generate a hint so that the player may have a better idea of the targeted game.
-You must not mention the name of the targeted game in your response.
-You must use the falsly guessed game in your hint.
-You must generate a short hint with a maximum of five sentences and a minimum uf one  sentence.
+You must not mention the game {target_game_name} in your response.
+You must use the falsely guessed game in your hint.
+You must generate a short hint with a maximum of five sentences and a minimum of one sentence.
 You must not make it too easy.
 """
 
