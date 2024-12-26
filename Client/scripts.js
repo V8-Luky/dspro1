@@ -1,16 +1,12 @@
-// Select a random secret game
-let data = []; // To hold the fetched games
-let lastGuess = null; // Variable to store the last guess
+let data = [];
+let lastGuess = null;
 
-// Fetch the games using the fetchGames function from fetching.js
+
 async function initializeGame() {
     try {
         // Fetch all games
-        const allGamesResponse = await fetchGames(); // Using fetchGames from fetching.js
-
+        const allGamesResponse = await fetchGames();
         data = allGamesResponse.games // Populate the data array
-
-        console.log("Fetched games:", data);
 
     } catch (error) {
         console.error("Error initializing the game:", error);
@@ -20,29 +16,29 @@ async function initializeGame() {
 // Initialize the game
 initializeGame();
 
-// Modal elements
 const congratsModal = document.getElementById("congratsModal");
 const closeModal = document.getElementById("closeModal");
 const guessButton = document.getElementById("guessButton");
-
-// Input field and dropdown container
 const guessInput = document.getElementById("guessInput");
 const dropdown = document.createElement("div");
+const menuIcon = document.getElementById("menuIcon");
+const dropdownMenu = document.getElementById("dropdownMenu");
+
 dropdown.id = "autocompleteDropdown";
 dropdown.classList.add("dropdown");
 document.body.appendChild(dropdown);
 
-// Autocomplete suggestions on input change
+// Handle suggestions for input field
 guessInput.addEventListener("input", () => {
     const userInput = guessInput.value.trim().toLowerCase();
     if (userInput.length >= 3) {
         showSuggestions(userInput);
     } else {
-        dropdown.style.display = "none"; // Hide the dropdown if input is too short
+        dropdown.style.display = "none";
     }
 });
 
-// Handle Submit button click
+// Handle submit button click
 guessButton.addEventListener("click", async () => {
     if (guessButton.disabled) return;
 
@@ -50,20 +46,16 @@ guessButton.addEventListener("click", async () => {
     await submitFirstMatchingGame();
 });
 
-// Add an event listener for the "Enter" key
+// Handle enter keydown event on input field
 guessInput.addEventListener("keydown", async (event) => {
     if (event.key === "Enter") {
-        // Prevent submission if the button is disabled
+
         if (guessButton.disabled) return;
 
         // Trigger the guess submission with the first match
         await submitFirstMatchingGame();
     }
 });
-
-// Dropdown elements
-const menuIcon = document.getElementById("menuIcon");
-const dropdownMenu = document.getElementById("dropdownMenu");
 
 // Toggle dropdown visibility
 menuIcon.addEventListener("click", () => {
@@ -114,7 +106,6 @@ function processFeedback(feedback) {
     const similarityCell = createSimilarityCell(feedback.similarity);
     row.appendChild(similarityCell);
 
-    // Append the row to the table body
     tableBody.prepend(row);
 
     if (feedback.is_correct) {
@@ -146,8 +137,7 @@ function createMatchMismatchCell(data) {
         // Only mismatchItems is not empty
         cellContent = `${mismatchItems}`;
     } else {
-        // Both are empty; you can choose to display a placeholder or leave it empty
-        cellContent = ""; // Or use "N/A" if you prefer
+        cellContent = "";
     }
 
     cell.innerHTML = cellContent;
@@ -177,9 +167,9 @@ function createSimilarityCell(similarity) {
     const cell = document.createElement("td");
     const color = getSimilarityColor(similarity);
 
-    // Style the cell background and text
+    // Styling for the cell background and text
     cell.style.background = color;
-    cell.style.color = "black"; // Ensure text is readable
+    cell.style.color = "black";
     cell.style.textAlign = "center";
     cell.style.fontWeight = "bold";
     cell.textContent = `${(similarity * 100).toFixed(1)}%`; // Display percentage
@@ -188,24 +178,24 @@ function createSimilarityCell(similarity) {
 }
 
 function getSimilarityColor(similarity) {
-    // Gradient from red (0) to yellow (0.5) to green (1)
+    const brightnessFactor = 0.7;
+
     if (similarity <= 0.5) {
         // Transition from red to yellow
-        const red = 255;
-        const green = Math.floor(255 * (similarity / 0.5));
+        const red = Math.floor(255 * brightnessFactor);
+        const green = Math.floor(255 * (similarity / 0.5) * brightnessFactor);
         return `rgb(${red}, ${green}, 0)`;
     } else {
         // Transition from yellow to green
-        const red = Math.floor(255 * ((1 - similarity) / 0.5));
-        const green = 255;
+        const red = Math.floor(255 * ((1 - similarity) / 0.5) * brightnessFactor);
+        const green = Math.floor(255 * brightnessFactor);
         return `rgb(${red}, ${green}, 0)`;
     }
 }
 
+
 // Show autocomplete suggestions
 function showSuggestions(input) {
-    // Filter game names that include the input substring
-
     const matches = data
         .filter(name => name.trim().toLowerCase().includes(input)) // Case-insensitive matching
         .slice(0, 10); // Limit to the first 10 matches
@@ -227,7 +217,7 @@ function showSuggestions(input) {
     matches.forEach(match => {
         const suggestionItem = document.createElement("div");
         suggestionItem.classList.add("suggestion-item");
-        suggestionItem.textContent = match.trim(); // Trim any leading/trailing whitespace
+        suggestionItem.textContent = match.trim();
 
         // When a suggestion is clicked, fill the input field and hide the dropdown
         suggestionItem.addEventListener("click", () => {
@@ -293,7 +283,7 @@ document.getElementById("hintItem").addEventListener("click", async () => {
             return;
         }
 
-        const hintText = await hint(lastGuess); // Assuming hint() returns a string
+        const hintText = await hint(lastGuess);
         hintBox.textContent = hintText.hint;
     } catch (error) {
         hintBox.textContent = "Unable to fetch a hint. Try again later.";
@@ -316,7 +306,6 @@ function addCorrectGameToTable(game) {
     const tableBody = document.getElementById("guessTableBody");
     const row = document.createElement("tr");
 
-    // Helper function to safely join array data or return "N/A"
     const safeJoin = (array) => Array.isArray(array) && array.length > 0 ? array.join(", ") : "N/A";
 
     // Name Cell
@@ -358,22 +347,20 @@ function addCorrectGameToTable(game) {
     const similarityCell = createSimilarityCell(1); // Pass 1 for 100% similarity
     row.appendChild(similarityCell);
 
-    // Prepend the correct game to the table
     tableBody.prepend(row);
 }
 
 // Function to disable the submit button
 function disableSubmitButton() {
     guessButton.disabled = true;
-    guessButton.style.backgroundColor = "#555"; // Optional: Change color to indicate disabled state
-    guessButton.style.cursor = "not-allowed"; // Optional: Change cursor to indicate disabled state
+    guessButton.style.backgroundColor = "#555";
+    guessButton.style.cursor = "not-allowed";
 }
 
 // Function to find the first matching game and make the API call
 async function submitFirstMatchingGame() {
     const userInput = guessInput.value.trim().toLowerCase();
 
-    // Hide the dropdown
     dropdown.style.display = "none";
 
     const firstMatch = data
@@ -381,9 +368,9 @@ async function submitFirstMatchingGame() {
         .slice(0, 1);
 
     if (firstMatch) {
-        // Use the first match and make the API call
+
         await makeGuess(firstMatch);
-        guessInput.value = ""; // Clear the input field
+        guessInput.value = "";
     } else {
         alert("No matching game found! Please try a different guess.");
     }
