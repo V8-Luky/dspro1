@@ -368,7 +368,8 @@ async function submitFirstMatchingGame() {
         .slice(0, 1);
 
     if (firstMatch) {
-
+        // Use the first match and make the API call
+        lastGuess = firstMatch;
         await makeGuess(firstMatch);
         guessInput.value = "";
     } else {
