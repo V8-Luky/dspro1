@@ -12,7 +12,7 @@ async function fetchGames() {
         }
 
         const games = await response.json();
-        return games; // Return the games list
+        return games;
     } catch (error) {
         console.error("Error fetching games:", error);
     }
@@ -25,55 +25,39 @@ async function makeGuess(gameName) {
             method: "POST",
         });
 
-        /*
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-         */
-
         const result = await response.json();
 
         processFeedback(result);
       
-        return result; // Return the guess result
+        return result;
     } catch (error) {
         console.error("Error making a guess:", error);
     }
 }
 
-
+// Function to get a hint
 async function hint(gameName) {
     try {
         const response = await fetch(`${BASE_API_URL}/hint?name=${gameName}`, {
             method: "GET",
         });
 
-        /*
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-         */
-
         const result = await response.json();
-        return result; // Return the guess result
+        return result;
     } catch (error) {
         console.error("Error making a guess:", error);
     }
 }
 
+// Function to fetch the secret game after give up
 async function fetchSecretGame() {
     try {
         const response = await fetch(`${BASE_API_URL}/target`, {
             method: "GET",
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const secretGame = await response.json();
-        console.log("Fetched Secret Game:", secretGame);
-        return secretGame; // Return the target game object
+        return secretGame;
     } catch (error) {
         console.error("Error fetching target game:", error);
     }
