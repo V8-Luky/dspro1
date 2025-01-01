@@ -1,5 +1,3 @@
-import pandas as pd
-
 from embedding.game_embedder import GameEmbedder
 
 
