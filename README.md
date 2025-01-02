@@ -5,3 +5,6 @@ With the number of video games increasing every year, finding new games that mat
 Luca Kyburz (V8-Luky)
 Luca Niederer (lucachecnchecnStud)
 Silvan Vifian (SilvanHSLU)
+
+## Playing the Game
+The game is hosted on GitHubg pages and can be played [here](https://v8-luky.github.io/dspro1/).

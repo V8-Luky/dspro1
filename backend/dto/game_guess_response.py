@@ -1,6 +1,6 @@
 """Contains the DTO class for the response of a game guess request."""
 
-from logic.game_comparison import GameComparison
+from ..logic.game_comparison import GameComparison
 
 from .serializable import Serializable
 

@@ -2,12 +2,12 @@
 
 import numpy as np
 
-from backend.dto import GameGuessResponse, HintResponse, GamesResponse, GameResponse
-from database.game_database import GameDatabase
-from logic.daily_target_game import DailyTargetGame
-from logic.game import Game
-from logic.game_comparison import GameComparison
-from logic.hint_generator import HintGenerator
+from .dto import GameGuessResponse, HintResponse, GamesResponse, GameResponse
+from .database.game_database import GameDatabase
+from .logic.daily_target_game import DailyTargetGame
+from .logic.game import Game
+from .logic.game_comparison import GameComparison
+from .logic.hint_generator import HintGenerator
 
 METADATA_NAME = "metadata"
 SCORE_NAME = "score"

@@ -49,7 +49,7 @@ class GameDatabase:
         return records
 
     def __init__(self, api_key: str, indexes: dict[str, int] = None) -> None:
-        self.pc = Pinecone(api_key=api_key)
+        self._pinecone = Pinecone(api_key=api_key)
         self._namespace = "steam-games"
         self._indexes = dict()
         if indexes:
@@ -69,7 +69,7 @@ class GameDatabase:
         """
         return self._get_index(index_name).describe_index_stats()
 
-    def get_by_id(self, index_name: str, id_: str) -> np.ndarray:
+    def get_by_id(self, index_name: str, id_: str) -> list:
         """
         Retrieves the record of a game by its ID.
 
@@ -89,7 +89,7 @@ class GameDatabase:
 
         return results["vectors"][id_]
 
-    def get_ids(self, index_name: str):
+    def get_ids(self, index_name: str) -> list:
         """
         Retrieves all the IDs in the specified index.
 
@@ -107,7 +107,7 @@ class GameDatabase:
 
         return all_ids
 
-    def get_similar(self, index_name: str, embedding: np.ndarray, k: int = 1):
+    def get_similar(self, index_name: str, embedding: np.ndarray, k: int = 1) -> list:
         """
         Retrieves the k most similar records to the specified embedding.
 
@@ -132,7 +132,7 @@ class GameDatabase:
 
         return results["matches"]
 
-    def get_similarity(self, index_name: str, name: str, embedding: np.ndarray):
+    def get_similarity(self, index_name: str, name: str, embedding: np.ndarray) -> dict:
         """
         Retrieves the similarity for a specified game to a given embedding.
 
@@ -200,27 +200,27 @@ class GameDatabase:
     def _clear_data(self, index_name: str):
         self._delete_index(index_name=index_name)
 
-    def _create_index(self, index_name: str, dimension: int, metric: str):
-        if not self.pc.has_index(index_name):
-            self.pc.create_index(
+    def _create_index(self, index_name: str, dimension: int, metric: str) -> Index:
+        if not self._pinecone.has_index(index_name):
+            self._pinecone.create_index(
                 name=index_name,
                 dimension=dimension,
                 metric=metric,
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
             )
 
-        while not self.pc.describe_index(index_name).status["ready"]:
+        while not self._pinecone.describe_index(index_name).status["ready"]:
             time.sleep(1)
 
-        self._indexes[index_name] = self.pc.Index(index_name)
+        self._indexes[index_name] = self._pinecone.Index(index_name)
         return self._get_index(index_name)
 
     def _delete_index(self, index_name: str):
-        if not self.pc.has_index(index_name):
+        if not self._pinecone.has_index(index_name):
             return
-        self.pc.delete_index(index_name)
+        self._pinecone.delete_index(index_name)
 
-    def _get_index(self, index_name: str):
+    def _get_index(self, index_name: str) -> Index:
         return self._indexes[index_name]
 
     def _upsert_records(self, namespace: str, index: Index, records: list[dict]):
